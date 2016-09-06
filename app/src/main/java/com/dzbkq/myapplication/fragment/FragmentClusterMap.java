@@ -12,23 +12,18 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MyLocationConfiguration;
-import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.TextureMapView;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
-import com.dzbkq.myapplication.DebugConstants;
 import com.dzbkq.myapplication.GisEventFactory;
 import com.dzbkq.myapplication.LocationRecorder;
 import com.dzbkq.myapplication.MyApp;
@@ -46,16 +41,13 @@ import com.dzbkq.myapplication.model.PointList;
  */
 public class FragmentClusterMap extends Fragment implements LoaderManager.LoaderCallbacks<PointList>{
 	private static final String TAG = FragmentClusterMap.class.getSimpleName();
-	
-	
+
 	private TextureMapView mMapView;
 	private BaiduMap mBaiduMap;
 	private static CoordinateConverter mConverter;
-	private float density = 1f;
 	private Context mContext;
 	private int layerControl = 0;
-	private View btn_goto_myLoc;
-	
+
 	static {
 		mConverter = new CoordinateConverter();
 		mConverter.from(CoordinateConverter.CoordType.GPS);
@@ -69,7 +61,7 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 			final String action = intent.getAction();
 			switch (action) {
 			case GisEventFactory.ACTION_POINT_ADD:
-				Location l = (Location) intent.getParcelableExtra("point");
+				Location l = intent.getParcelableExtra("point");
 				onNewLocation(l);
             	break;
 			default:
@@ -92,8 +84,6 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
 		this.layerControl = getArguments().getInt("layerControl", layerControl);
-		if (DebugConstants.debuglayerControl)
-		    this.layerControl = 7;
 	}
 	
 	@Override
@@ -107,32 +97,9 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 		super.onViewCreated(view, savedInstanceState);
 		mMapView = (TextureMapView) view.findViewById(R.id.bmapView);
 		mBaiduMap = mMapView.getMap();
-		mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(16.0f));
+		mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(10.0f));
 		mBaiduMap.setMyLocationEnabled(true);
 		mBaiduMap.setMyLocationConfigeration(new MyLocationConfiguration(MyLocationConfiguration.LocationMode.FOLLOWING, true, null));
-		btn_goto_myLoc = view.findViewById(R.id.btn_goto_mulocation);
-		btn_goto_myLoc.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Location l = LocationRecorder.getInstance().get();
-				if (l == null) {
-					Toast.makeText(getActivity(), "尚未获取到最新的位置", Toast.LENGTH_LONG).show();
-					return;
-				}
-				LatLng baiduLocation = mConverter.coord(new LatLng(l.getLatitude(), l.getLongitude())).convert();
-				com.baidu.mapapi.map.MyLocationData.Builder locDataBuilder = new MyLocationData.Builder()
-						.latitude(baiduLocation.latitude)
-						.longitude(baiduLocation.longitude);
-				if (l.hasAccuracy())
-					locDataBuilder.accuracy(l.getAccuracy());
-				// 此处设置开发者获取到的方向信息，顺时针0-360
-				if (l.hasBearing())
-					locDataBuilder.direction(l.getBearing());
-				mBaiduMap.setMyLocationData(locDataBuilder.build());
-
-			}
-		});
 		try { optionalConfig();} catch(Exception e) {e.printStackTrace();}
 	}
 	
@@ -141,9 +108,6 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 		super.onActivityCreated(savedInstanceState);
 		Log.d(TAG, "onActivityCreated");
 		mContext = getActivity().getApplicationContext();
-		DisplayMetrics metrics = new DisplayMetrics();
-		getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		density = metrics.density;
 		cmgr = new MyClusterManager(mContext, mBaiduMap, new TaskLineIconManager(mContext));
 		mBaiduMap.setOnMarkerClickListener(cmgr);
 		mBaiduMap.setOnMapStatusChangeListener(cmgr);
@@ -152,9 +116,7 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 		// Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
 		// getLoaderManager().initLoader(0, null, this);
-
 		reloadResPoint();
-
 
 	}
 	
@@ -172,7 +134,7 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 	@Override
 	public void onPause() {
 		super.onPause();
-		saveLatestPostion(mContext, mBaiduMap.getMapStatus().target);
+		saveLatestPosition(mContext, mBaiduMap.getMapStatus().target);
 		mMapView.onPause();
 		mContext.unregisterReceiver(mBroadcastReceiver);
 	}
@@ -189,8 +151,8 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 	//-------------------AyncLoader callbacks-------
 	@Override
 	public Loader<PointList> onCreateLoader(int id, Bundle args) {
-		return new StrategyPointsLoader(mContext, 0);
-		
+		return new StrategyPointsLoader(mContext, layerControl);
+
 	}
 
 	@Override
@@ -203,8 +165,6 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 			cmgr.addItems(data);
 			cmgr.cluster();
 		}
-
-
 		
 	}
 
@@ -228,14 +188,8 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
         //调整缩放控件的位置  
         //zoomControls.setPadding(0, 0, 0, 100);  
         //获取mapview中的百度地图图标  
-        ImageView iv = (ImageView) mMapView.getChildAt(1); 
-        for (int i = 0; i < mMapView.getChildCount(); i++) {
-        	Log.e("====", mMapView.getChildAt(i).getId() + "" + mMapView.getChildAt(i));
-			
-		}
+        ImageView iv = (ImageView) mMapView.getChildAt(1);
         iv.setVisibility(View.GONE);
-
-        
 	}
 
 	
@@ -269,7 +223,7 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 		}
 	}
 	
-	private void saveLatestPostion(Context context, LatLng positon) {
+	private void saveLatestPosition(Context context, LatLng positon) {
 		if (positon == null)
 			return;
 		try {
@@ -277,7 +231,7 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 			MyApp.getInstance()
 					.getSharedPreferences("gis", Context.MODE_PRIVATE)
 					.edit().putString("LastPosition", str).commit();
-		} catch(Exception e) {};
+		} catch(Exception e) {/*NOOP*/};
 	}
 
 

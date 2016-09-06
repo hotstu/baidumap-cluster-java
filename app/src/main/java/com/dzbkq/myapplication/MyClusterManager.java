@@ -51,7 +51,7 @@ public class MyClusterManager extends ClusterManager<ResPoint> implements MyClus
 	
 	 /**
      * Get the marker from a ClusterItem
-     * @param clusterItem ClusterItem which you will obtain its marker
+     * @param item ClusterItem which you will obtain its marker
      * @return a marker from a ClusterItem or null if it does not exists
      */
 	public Marker getItemMarker(ResPoint item) {

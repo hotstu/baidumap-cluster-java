@@ -41,18 +41,13 @@ public class TaskLineIconManager implements InterfaceIconMgr {
 		    };
 	private IconGenerator ig;
 	private SparseArray<BitmapDescriptor> backgrouds;
-	private boolean released = false;
 
 	
 	public TaskLineIconManager(Context context) {
 		ig = new IconGenerator(context);
 		backgrouds = new SparseArray<>(colors.length);
 	}
-	
-	public boolean isReleased() {
-		return released;
-	}
-	
+
 	public static int getColorCodeBy(String taskId) {
 		int index = 0;
 		if (taskId != null) {
@@ -102,7 +97,7 @@ public class TaskLineIconManager implements InterfaceIconMgr {
 		Log.d("IconFactory", "getIconAt:" + index);
 		if (backgrouds.get(index) == null) {
 			ig.setStyle(colors[index]);
-			backgrouds.put(index, BitmapDescriptorFactory.fromBitmap(ig.makeIcon("G")));
+			backgrouds.put(index, BitmapDescriptorFactory.fromBitmap(ig.makeIcon("P"+index)));
 			
 		}
 		return backgrouds.get(index);
@@ -119,14 +114,7 @@ public class TaskLineIconManager implements InterfaceIconMgr {
 
 	@Override
 	public void release() {
-		try {
-			for (int i = 0; i < backgrouds.size(); i++) {
-				int key = backgrouds.keyAt(i);
-				backgrouds.get(key).recycle();
-			}
-			backgrouds.clear();
-		} catch(Exception e) {}
-		released  = true;
+		// FIXME: 2016/9/6 在异步环境下如果直接recycle会引发问题，这里不recycle实际影响有多大？
 	}
 
 }

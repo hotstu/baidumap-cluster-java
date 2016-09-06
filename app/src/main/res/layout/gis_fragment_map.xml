@@ -10,14 +10,4 @@
         android:layout_height="fill_parent"
         android:clickable="true" />
 
-    <ImageButton
-        android:id="@+id/btn_goto_mulocation"
-        android:layout_width="36dip"
-        android:layout_height="36dip"
-        android:layout_alignParentLeft="true"
-        android:layout_marginTop="10dip"
-        android:layout_marginLeft="10dip"
-        android:background="#eeffffff"
-        android:src="@drawable/resource_prospect_localtion" />
-
 </RelativeLayout>

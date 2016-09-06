@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/app_bar_main"
-    tools:context="com.dzbkq.myapplication.MainActivity">
+    tools:context="com.dzbkq.myapplication.MainActivity"
+    tools:showIn="@layout/app_bar_main">
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="baidu map cluster demo"
-        android:onClick="bdmapcluster"/>
+        android:onClick="bdmapcluster"
+        android:text="baidu map cluster demo1" />
 
-</RelativeLayout>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="bdmapcluster2"
+        android:text="baidu map cluster demo2" />
+
+</LinearLayout>

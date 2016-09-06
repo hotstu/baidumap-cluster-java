@@ -109,6 +109,13 @@ public class MainActivity extends AppCompatActivity
 
     public void bdmapcluster(View view) {
         Intent i = new Intent(this, MapActivity.class);
+        i.putExtra("layerControl", 1);
+        startActivity(i);
+    }
+
+    public void bdmapcluster2(View view) {
+        Intent i = new Intent(this, MapActivity.class);
+        i.putExtra("layerControl", 0);
         startActivity(i);
     }
 }
