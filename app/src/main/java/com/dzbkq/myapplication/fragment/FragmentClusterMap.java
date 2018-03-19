@@ -97,7 +97,7 @@ public class FragmentClusterMap extends Fragment implements LoaderManager.Loader
 		super.onViewCreated(view, savedInstanceState);
 		mMapView = (TextureMapView) view.findViewById(R.id.bmapView);
 		mBaiduMap = mMapView.getMap();
-		mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(10.0f));
+		mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(100.0f));
 		mBaiduMap.setMyLocationEnabled(true);
 		mBaiduMap.setMyLocationConfigeration(new MyLocationConfiguration(MyLocationConfiguration.LocationMode.FOLLOWING, true, null));
 		try { optionalConfig();} catch(Exception e) {e.printStackTrace();}

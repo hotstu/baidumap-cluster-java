@@ -49,7 +49,7 @@ public class PerlinPointsLoadTask implements IPointLoadTask {
         }
         double lat = 39.945;
         double lng = 116.404;
-        double fraction = 0.6;
+        double fraction = 0.8;
         for (int i = -100; i < 100; i++) {
             for (int j = -100; j < 100; j++) {
                 double value;
